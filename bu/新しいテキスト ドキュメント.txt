@@ -1,0 +1,207 @@
+#include "main.h"
+#include "Skybox.h"
+#include "set.h"
+
+//
+// マクロ定義
+//
+#define MAX_SKYBOX_SIZE		(500.0f)		//幅
+
+//
+// スタティック変数
+//
+static LPDIRECT3DTEXTURE9			s_pTexture = NULL;		// テクスチャへのポインタ
+static LPDIRECT3DVERTEXBUFFER9		s_pVtxBuff = NULL;		// 頂点バッファへのポインタ
+
+//
+// 初期化
+//
+void InitSkybox(void)
+{
+	// デバイスへのポインタの取得
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+
+	// テクスチャの読み込み
+	D3DXCreateTextureFromFile(
+		pDevice,
+		"data\\TEXTURE\\skybox.jpg",
+		&s_pTexture);
+
+	// 頂点バッファの生成
+	pDevice->CreateVertexBuffer(
+		sizeof(VERTEX_PT) * 24,
+		D3DUSAGE_WRITEONLY,
+		FVF_VERTEX_PT,
+		D3DPOOL_MANAGED,
+		&s_pVtxBuff,
+		NULL);
+
+	VERTEX_PT *pVtx = NULL;		// 頂点情報へのポインタ
+
+	// 頂点情報をロックし、頂点情報へのポインタを取得
+	s_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	float fxsize=1.0f/4;
+	float fysize=1.0f/3;
+	
+	// fill in the front face vertex data
+	SetAllPNT(0,pVtx,-MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f);
+	SetAllPNT(1,pVtx,-MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f);
+	SetAllPNT(2,pVtx, MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
+	SetAllPNT(3,pVtx, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f);
+
+	// fill in the back face vertex data
+	SetAllPNT(4,pVtx,-MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+	SetAllPNT(5,pVtx, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f);
+	SetAllPNT(6,pVtx, MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+	SetAllPNT(7,pVtx,-MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f);
+
+	// fill in the top face vertex data
+	SetAllPNT(8,pVtx,-MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+	SetAllPNT(9,pVtx,-MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f);
+	SetAllPNT(10,pVtx, MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f);
+	SetAllPNT(11,pVtx, MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+
+	// fill in the bottom face vertex data
+	SetAllPNT(12,pVtx,-MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f);
+	SetAllPNT(13,pVtx, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f);
+	SetAllPNT(14,pVtx, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f);
+	SetAllPNT(15,pVtx,-MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+
+	// fill in the left face vertex data
+	SetAllPNT(16,pVtx,-MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	SetAllPNT(17,pVtx,-MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	SetAllPNT(18,pVtx,-MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	SetAllPNT(19,pVtx,-MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+
+	// fill in the right face vertex data
+	SetAllPNT(20,pVtx, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	SetAllPNT(21,pVtx, MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	SetAllPNT(22,pVtx, MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f);
+	SetAllPNT(23,pVtx, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE,  MAX_SKYBOX_SIZE, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	
+	// 前
+	SetAllPT(0,pVtx,-MAX_SKYBOX_SIZE , -MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE , fxsize*3, fysize);
+	SetAllPT(1, pVtx, MAX_SKYBOX_SIZE , -MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE , fxsize * 4, fysize);
+	SetAllPT(2, pVtx, -MAX_SKYBOX_SIZE , +MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE , fxsize * 3, fysize*2);
+	SetAllPT(3, pVtx, MAX_SKYBOX_SIZE , +MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE , fxsize * 4, fysize * 2);
+
+		////背面的四个顶点
+		// MAX_SKYBOX_SIZE , 0.0f,   -MAX_SKYBOX_SIZE , 0.0f, 1.0f )
+		// MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE ,  -MAX_SKYBOX_SIZE , 0.0f, 0.0f, ),
+		// -MAX_SKYBOX_SIZE , 0.0f,   -MAX_SKYBOX_SIZE , 1.0f, 1.0f, ),
+		// -MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE ,  -MAX_SKYBOX_SIZE , 1.0f, 0.0f, ),
+
+		////左面的四个顶点
+		// -MAX_SKYBOX_SIZE , 0.0f,   -MAX_SKYBOX_SIZE , 0.0f, 1.0f, ),
+		// -MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE ,  -MAX_SKYBOX_SIZE , 0.0f, 0.0f, ),
+		// -MAX_SKYBOX_SIZE , 0.0f,    MAX_SKYBOX_SIZE , 1.0f, 1.0f, ),
+		// -MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE ,   MAX_SKYBOX_SIZE , 1.0f, 0.0f, ),
+
+		////右面的四个顶点
+		// MAX_SKYBOX_SIZE , 0.0f,   MAX_SKYBOX_SIZE , 0.0f, 1.0f, ),
+		// MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE ,  MAX_SKYBOX_SIZE , 0.0f, 0.0f, ),
+		// MAX_SKYBOX_SIZE , 0.0f,  -MAX_SKYBOX_SIZE , 1.0f, 1.0f, ),
+		// MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE , -MAX_SKYBOX_SIZE , 1.0f, 0.0f, ),
+
+		////上面的四个顶点
+		// MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE , -MAX_SKYBOX_SIZE , 1.0f, 0.0f, ),
+		// MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE ,  MAX_SKYBOX_SIZE , 1.0f, 1.0f, ),
+		//	-MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE , -MAX_SKYBOX_SIZE , 0.0f, 0.0f, ),
+		//	-MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE ,  MAX_SKYBOX_SIZE , 0.0f, 1.0f, ),
+
+// 前
+	SetAllPT(0,pVtx,-MAX_SKYBOX_SIZE , -MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE , fxsize*3, fysize);
+	SetAllPT(1, pVtx, -MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE , -MAX_SKYBOX_SIZE , fxsize * 3, fysize * 2);
+	SetAllPT(2, pVtx, MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE , fxsize * 4, fysize * 2);
+	SetAllPT(3, pVtx, MAX_SKYBOX_SIZE , -MAX_SKYBOX_SIZE , -MAX_SKYBOX_SIZE , fxsize * 4, fysize);
+
+		////背面的四个顶点
+		// MAX_SKYBOX_SIZE , 0.0f,   -MAX_SKYBOX_SIZE , 0.0f, 1.0f )
+		// MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE ,  -MAX_SKYBOX_SIZE , 0.0f, 0.0f, ),
+		// -MAX_SKYBOX_SIZE , 0.0f,   -MAX_SKYBOX_SIZE , 1.0f, 1.0f, ),
+		// -MAX_SKYBOX_SIZE , MAX_SKYBOX_SIZE ,  -MAX_SKYBOX_SIZE , 1.0f, 0.0f, ),
+
+	// 後ろ
+	SetAllPT(4, pVtx, -MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, fxsize , fysize);
+	SetAllPT(5, pVtx, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, fxsize , fysize * 2);
+	SetAllPT(6, pVtx, MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, fxsize * 2, fysize * 2);
+	SetAllPT(7, pVtx, -MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, fxsize * 2, fysize );
+
+	// 上
+	SetAllPT(8, pVtx, -MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, fxsize, 0.0f);
+	SetAllPT(9, pVtx, -MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, fxsize, fysize);
+	SetAllPT(10, pVtx, MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, fxsize * 2, fysize * 2);
+	SetAllPT(11, pVtx, MAX_SKYBOX_SIZE, MAX_SKYBOX_SIZE, -MAX_SKYBOX_SIZE, fxsize * 2, fysize);
+	// 頂点バッファをアンロックする
+	s_pVtxBuff->Unlock();
+}
+
+//
+// 終了
+//
+void UninitSkybox(void)
+{
+	if (s_pTexture != NULL)
+	{// テクスチャの解放
+		s_pTexture->Release();
+		s_pTexture = NULL;
+	}
+
+	if (s_pVtxBuff != NULL)
+	{// 頂点バッファの解放
+		s_pVtxBuff->Release();
+		s_pVtxBuff = NULL;
+	}
+}
+
+//
+// 更新
+//
+void UpdateSkybox(void)
+{
+
+}
+
+//
+// 描画
+//
+void DrawSkybox(void)
+{
+	// デバイスへのポインタの取得
+	LPDIRECT3DDEVICE9 pDevice = GetDevice();
+	D3DXMATRIX mtxRot, mtxTrans,mtxWorld;		// 計算用マトリックス
+
+	// ワールドマトリックスの初期化
+	D3DXMatrixIdentity(&mtxWorld);
+
+	D3DXMatrixTranslation(&mtxTrans, 0.0f, 0.0f, 0.0f);
+	D3DXMatrixRotationY(&mtxRot, -0.000005f*timeGetTime());   //旋转天空网格, 简单模拟云彩运动效果
+
+	mtxWorld = mtxTrans*mtxRot;
+
+	pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);  //将纹理颜色混合的第一个参数的颜色值用于输出
+	pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);   //纹理颜色混合的第一个参数的值就取纹理颜色值
+
+	// ワールドマトリックスの設定
+	pDevice->SetTransform(D3DTS_WORLD, &mtxWorld);
+
+	// 頂点バッファをデータストリームに設定
+	pDevice->SetStreamSource(0, s_pVtxBuff, 0, sizeof(VERTEX_PT));
+
+	// 頂点フォーマットの設定
+	pDevice->SetFVF(FVF_VERTEX_PT);
+
+	// テクスチャの設定
+	pDevice->SetTexture(0, s_pTexture);
+
+	// ポリゴンの描画
+	pDevice->DrawPrimitive(
+		D3DPT_TRIANGLESTRIP,		// プリミティブの種類
+		0,							// 描画する最初の頂点インデックス
+		2);							// プリミティブ(ポリゴン)数
+
+	// テクスチャの解除
+	pDevice->SetTexture(0, NULL);
+}
+

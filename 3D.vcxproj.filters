@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="polygon.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="set.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="light.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="shadow.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="wall.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="text.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="billboard.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="skybox.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="input.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="polygon.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="set.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="light.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="shadow.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="wall.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="text.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="billboard.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="skybox.h">
+      <Filter>header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="cpp">
+      <UniqueIdentifier>{875ca56a-a3da-4555-ab40-24e2dc07ce62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header">
+      <UniqueIdentifier>{f652af40-2e2e-4fe1-802e-ea3e332fa559}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
