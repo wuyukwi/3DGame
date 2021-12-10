@@ -4,7 +4,6 @@ Author: Huang QiYue
 --------------------------------------------------
 */
 #include "terrain.h"
-#include "model.h"
 
 void InitTerrain(void)
 {
