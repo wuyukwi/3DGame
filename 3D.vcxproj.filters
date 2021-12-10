@@ -37,6 +37,9 @@
     <ClCompile Include="skybox.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
+    <ClCompile Include="terriain.cpp">
+      <Filter>cpp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="input.h">
@@ -73,6 +76,9 @@
       <Filter>header</Filter>
     </ClInclude>
     <ClInclude Include="skybox.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="terrain.h">
       <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
