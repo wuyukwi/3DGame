@@ -24,6 +24,7 @@ void InitLight(void)
 
 	// •½sŒõŒ¹‚Ì‰Šú‰»ˆ—
 	D3DXVECTOR3 vecDir = D3DXVECTOR3(0.707f, -0.707f, 0.707f);
+	D3DXVec3Normalize((D3DXVECTOR3*)&dirLight.Direction, &vecDir);
 	D3DXCOLOR dircol = WHITE;
 	dirLight = InitDirectionalLight(&vecDir, &dircol);
 

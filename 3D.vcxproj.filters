@@ -37,7 +37,7 @@
     <ClCompile Include="skybox.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
-    <ClCompile Include="terriain.cpp">
+    <ClCompile Include="terrain.cpp">
       <Filter>cpp</Filter>
     </ClCompile>
   </ItemGroup>

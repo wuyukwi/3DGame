@@ -25,14 +25,17 @@ Author: Huang QiYue
 #pragma comment(lib, "dinput8.lib")		// 入力処理に必要
 #pragma comment(lib, "xinput.lib")		// ジョイパッド処理に必要
 
-// --------------------------------------------------
-// マクロ定義
-// --------------------------------------------------
+//
+// インクルード
+//
 #define SCREEN_WIDTH		(1280)												// ウインドウの幅
 #define SCREEN_HEIGHT		(720)												// ウインドウの高さ
 #define FVF_VERTEX_PT		(D3DFVF_XYZ|D3DFVF_TEX1)		// 頂点フォーマット
 #define FVF_VERTEX_PNT		(D3DFVF_XYZ | D3DFVF_NORMAL |D3DFVF_TEX1)		// 頂点フォーマット
 #define FVF_VERTEX_3D		(D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE |D3DFVF_TEX1)		// 頂点フォーマット[3D]
+
+#define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }      //SAFE_RELEASE()インクルード,COMソース解放用
+#define SAFE_DELETE(p)  { if(p) { delete (p); (p)=NULL; } }
 
 typedef enum
 {

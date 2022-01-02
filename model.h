@@ -7,6 +7,7 @@ Author: Huang QiYue
 #define _Model_H_		// ２重インクルード防止のマクロ定義
 
 #include "main.h"
+#include "set.h"
 
 typedef struct
 {
@@ -20,6 +21,14 @@ typedef struct
 	LPD3DXBUFFER		adjBuffer;	//adjバッファ
 	DWORD				numMtrls;		//情報の数
 	D3DXMATRIX			mtxWorld;	// ワールドマトリックス
+	bool				bModelInteraction;//当たり判定
+	ID3DXMesh* SphereMesh;
+	ID3DXMesh* BoxMesh;
+
+	BoundingBox boundingBox;
+	BoundingSphere boundingSphere;
+
+	bool RenderBoundingSphere = true;
 }MODEL;
 
 void InitModel(void);
@@ -27,5 +36,6 @@ void UninitModel(void);
 void UpdateModel(void);
 void DrawModel(void);
 MODEL *GetModel(void);
+void ModelInteraction(D3DXVECTOR3*pPos, D3DXVECTOR3*pLastPos, D3DXVECTOR3*pMove, float width, float height, float lenght);
 
 #endif

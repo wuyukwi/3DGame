@@ -132,9 +132,8 @@ void DrawBillboard(void)
 {
 	// デバイスへのポインタの取得
 	LPDIRECT3DDEVICE9 pDevice = GetDevice();
-	D3DXMATRIX mtxRot, mtxTrans;		// 計算用マトリックス
+	D3DXMATRIX mtxRot, mtxTrans,mtxView;		// 計算用マトリックス
 
-	CAMERA *pCamera = GetCamera();
 
 	// 頂点バッファをデータストリームに設定
 	pDevice->SetStreamSource(0, s_pVtxBuff, 0, sizeof(VERTEX_PT));
@@ -155,18 +154,18 @@ void DrawBillboard(void)
 
 		// ワールドマトリックスの初期化
 		D3DXMatrixIdentity(&pBillboard->mtxWorld);
-		pDevice->GetTransform(D3DTS_VIEW, &pCamera->mtxView);
+		pDevice->GetTransform(D3DTS_VIEW, &mtxView);
 
 		// カメラの逆行列を設定
-		pBillboard->mtxWorld._11 = pCamera->mtxView._11;
-		pBillboard->mtxWorld._12 = pCamera->mtxView._21;
-		pBillboard->mtxWorld._13 = pCamera->mtxView._31;
-		pBillboard->mtxWorld._21 = pCamera->mtxView._12;
-		pBillboard->mtxWorld._22 = pCamera->mtxView._22;
-		pBillboard->mtxWorld._23 = pCamera->mtxView._32;
-		pBillboard->mtxWorld._31 = pCamera->mtxView._13;
-		pBillboard->mtxWorld._32 = pCamera->mtxView._23;
-		pBillboard->mtxWorld._33 = pCamera->mtxView._33;
+		pBillboard->mtxWorld._11 = mtxView._11;
+		pBillboard->mtxWorld._12 = mtxView._21;
+		pBillboard->mtxWorld._13 = mtxView._31;
+		pBillboard->mtxWorld._21 = mtxView._12;
+		pBillboard->mtxWorld._22 = mtxView._22;
+		pBillboard->mtxWorld._23 = mtxView._32;
+		pBillboard->mtxWorld._31 = mtxView._13;
+		pBillboard->mtxWorld._32 = mtxView._23;
+		pBillboard->mtxWorld._33 = mtxView._33;
 
 		// 位置を反映
 		D3DXMatrixTranslation(&mtxTrans, pBillboard->pos.x, pBillboard->pos.y, pBillboard->pos.z);

@@ -6,6 +6,7 @@ Author: Huang QiYue
 #ifndef _INPUT_H_		// このマクロ定義がされてなかったら
 #define _INPUT_H_		// ２重インクルード防止のマクロ定義
 
+
 #include "main.h"
 
 // --------------------------------------------------
@@ -37,18 +38,16 @@ typedef enum
 // --------------------------------------------------
 // プロトタイプ宣言
 // --------------------------------------------------
-HRESULT InitKeyboard(HINSTANCE hInstance, HWND hWnd);
-HRESULT InitJoypad(void);
-void UninitKeyboard(void);
-void UninitJoypad(void);
-void UpdateKeyboard(void);
-void UpdateJoypad(void);
+HRESULT InitInput(HINSTANCE hInstance, HWND hWnd);
+void UninitInput(void);
+void UpdataInput(void);
 bool GetKeyboardPress(int nKey);
 bool GetJoypadPress(JOYKEY key);
 bool GetKeyboardTrigger(int nKey);
 bool GetJoypadTrigger(JOYKEY key);
 bool GetKeyboardRelease(int nKey);
 bool GetKeyboardRepeat(int nKey);
-D3DXVECTOR3 GetJoypadStick(JOYKEY key);
 
+D3DXVECTOR3 GetJoypadStick(JOYKEY key);
+DIMOUSESTATE *GetMouseState(void);
 #endif //  !_INPUT_H_

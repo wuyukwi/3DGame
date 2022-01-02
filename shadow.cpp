@@ -5,7 +5,7 @@ Author: Huang QiYue
 */
 #include "polygon.h"
 #include "model.h"
-
+#include "camera.h"
 void InitShadow(void)
 {
 
@@ -55,11 +55,12 @@ void DrawShadow(void)
 		&groundPlane);
 
 	MODEL *pModel = GetModel();
+	CAMERA *pCamera = GetCamera();
 
 	D3DXMATRIX R,T,W;
 
 	// Œü‚«‚ð”½‰f
-	D3DXMatrixRotationY(&R, pModel->rot.y);
+	D3DXMatrixRotationY(&R, pCamera->rot.y+1.5f);
 
 	D3DXMatrixTranslation(&T, pModel->pos.x, pModel->pos.y, pModel->pos.z);
 	//D3DXMatrixMultiply(&W, &W, &T);

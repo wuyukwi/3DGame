@@ -13,6 +13,7 @@ Author: Huang QiYue
 #include "text.h"
 #include "billboard.h"
 #include "skybox.h"
+#include "wall.h"
 
 // --------------------------------------------------
 // マクロ定義
@@ -45,6 +46,8 @@ char					FPSString[9];				//
 bool					g_bUseDebug = true;			// デバッグ表示をするか 
 bool					g_bUsePause = false;			// ポーズ中かどうか
 float					timeDelta = 0.0f;
+bool                    antiAlisa = true;    //
+bool                    wireframe = false;
 MODE g_mode = MODE_TITLE;		// 現在のモード
 
 D3DXMATRIX proj;
@@ -218,9 +221,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 
 
-	case WM_LBUTTONDOWN:		// マウス右クリックのメッセージ
-								// ウインドウにフォーカスを合わせる
-		SetFocus(hWnd);
+	case WM_LBUTTONDOWN:		// マウス左クリックのメッセージ	
+		antiAlisa = !antiAlisa;
+		break;
+
+	case WM_RBUTTONDOWN:		// マウス右クリックのメッセージ	
+		wireframe = !wireframe;
 		break;
 	}
 
@@ -260,6 +266,14 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	d3dpp.Windowed = bWindow;	// FALSE; 							// ウインドウモード
 	d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;		// リフレッシュレート
 	d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;		// インターバル
+	d3dpp.MultiSampleType = D3DMULTISAMPLE_8_SAMPLES;
+
+	if (!d3dpp.Windowed)
+	{//フルースクリーンの場合解像度を画面に合わせる
+		d3dpp.BackBufferWidth = d3ddm.Width;
+		d3dpp.BackBufferHeight = d3ddm.Height;
+		d3dpp.BackBufferFormat = d3ddm.Format;
+	}
 
 	// Direct3Dデバイスの生成(描画処理と頂点処理をハードウェア)
 	if (FAILED(g_pD3D->CreateDevice(
@@ -300,11 +314,11 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// レンダーステートの設定
 	g_pD3DDevice->SetRenderState(D3DRS_CULLMODE,D3DCULL_CCW);
 
-	g_pD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-	g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-	g_pD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	g_pD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	//g_pD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	//g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+	//g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
+	//g_pD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	//g_pD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
 	//// αの加算合成の設定 色＝対象の色　＊対象のα値 ＋ 背景の色　＊1.0
 	//g_pD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
@@ -318,12 +332,9 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	//g_pD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	
 
-	// FSAA
-	/*g_pD3DDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);*/
-
 	// サンプラーステートの設定
 	
-	// Linear filtering
+	//// Linear filtering
 	// g_pD3DDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);		// 画像を小さくしても綺麗にする
 	// g_pD3DDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);		// 画像を大きくしても綺麗にする
 
@@ -342,9 +353,9 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// g_pD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);	// テクスチャのUの繰り返し方を設定
 	// g_pD3DDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);	// テクスチャのVの繰り返し方を設定
 
-	g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);		// ポリゴンとテクスチャのαをまぜる
-	g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);		// １つ目の色はテクスチャの色
-	g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);		// ２つ目の色は現在の色
+	//g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);		// ポリゴンとテクスチャのαをまぜる
+	//g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);		// １つ目の色はテクスチャの色
+	//g_pD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_CURRENT);		// ２つ目の色は現在の色
 
 	// デバッグ表示用フォントの生成
 	D3DXCreateFont(
@@ -362,7 +373,7 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 		&g_pFont);// タイプフェイス名を含む文字列。 コンパイラの設定で Unicode が必要な場合、データ型 LPCTSTR は LPCWSTR に解決されます。 それ以外の場合、文字列データ型は LPCSTR に解決されます。
 
 	// キーボードの初期化処理
-	if (FAILED(InitKeyboard(hInstance, hWnd)))
+	if (FAILED(InitInput(hInstance, hWnd)))
 	{
 		return E_FAIL;
 	}
@@ -374,9 +385,6 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// // フェードの設定
 	// InitFade(g_mode);
 
-	// ジョイパッドの初期化処理
-	InitJoypad();
-
 	// スカイボックスの初期化処理
 	InitSkybox();
 
@@ -386,6 +394,21 @@ HRESULT Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	// 影の初期化処理
 	InitShadow();
 
+	//壁の初期化処理
+	InitWall();
+
+	//壁の設定
+	SetWall(D3DXVECTOR3(0.0f, 0.0f, 200.0f), D3DXVECTOR3(-0.5f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	SetWall(D3DXVECTOR3(0.0f, 0.0f, -200.0f), D3DXVECTOR3(0.5f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	SetWall(D3DXVECTOR3(200.0f, 0.0f, 0.0f), D3DXVECTOR3(0.5f, -0.5f, 0.0f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+	SetWall(D3DXVECTOR3(-200.0f, 0.0f, 0.0f), D3DXVECTOR3(0.5f, 0.5f, 0.0f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f));
+
+	SetWall(D3DXVECTOR3(0.0f, 0.0f, 200.0f), D3DXVECTOR3(0.5f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f));
+	SetWall(D3DXVECTOR3(0.0f, 0.0f, -200.0f), D3DXVECTOR3(-0.5f, 0.0f, 0.0f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f));
+	SetWall(D3DXVECTOR3(200.0f, 0.0f, 0.0f), D3DXVECTOR3(-0.5f, -0.5f, 0.0f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f));
+	SetWall(D3DXVECTOR3(-200.0f, 0.0f, 0.0f), D3DXVECTOR3(-0.5f, 0.5f, 0.0f), D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.5f));
+
+	
 	// カメラの初期化処理
 	InitCamera();
 
@@ -414,11 +437,8 @@ void Uninit(void)
 {
 	// 各種オブジェクトの終了処理-------------------------
 
-	// キーボードの終了処理
-	UninitKeyboard();
-
-	// ジョイパッドの終了処理
-	UninitJoypad();
+	// 入力の終了処理
+	UninitInput();
 
 	// // タイトル画面の終了処理
 	// UninitTitle();
@@ -443,6 +463,9 @@ void Uninit(void)
 
 	// 影の終了処理
 	UninitShadow();
+
+	// 壁の終了処理
+	UninitWall();
 
 	// カメラの終了処理
 	UninitCamera();
@@ -517,11 +540,8 @@ void Update(void)
 	// // フェードの更新処理
 	// UpdateFade();
 
-	// キーボードの更新処理
-	UpdateKeyboard();
-
-	// ジョイパッドの更新処理
-	UpdateJoypad();
+	// 入力の更新処理
+	UpdataInput();
 
 	// スカイボックスの更新処理
 	UpdateSkybox();
@@ -531,6 +551,9 @@ void Update(void)
 
 	// 影の更新処理
 	UpdateShadow();
+
+	// 壁の更新処理
+	UpdateWall();
 
 	// カメラの更新処理
 	UpdateCamera();
@@ -555,6 +578,7 @@ void Update(void)
 	{// ポーズキー(Pキー)が押されたかどうか
 		g_bUsePause = !g_bUsePause;
 	}
+
 
 #endif //   _DEBUG
 
@@ -595,6 +619,11 @@ void Draw(void)
 		// 各種オブジェクトの描画処理
 		// -------------------------
 		
+		if(wireframe)
+		//g_pD3DDevice->SetMaterial(&YELLOW_MTRL);
+			g_pD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+		else
+			g_pD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 		// switch (g_mode)
 		// {
 		// case MODE_TITLE:
@@ -631,6 +660,9 @@ void Draw(void)
 		// スカイボックスの描画処理
 		DrawSkybox();
 
+		// 壁の描画処理
+		DrawWall();
+
 		// ビルボードの描画処理
 		DrawBillboard();
 
@@ -655,6 +687,13 @@ void Draw(void)
 			// デバッグの表示
 			DrawDebug();
 		}
+
+		// FSAA
+		if (antiAlisa)
+			g_pD3DDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+		else
+			g_pD3DDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+
 		
 #endif //   _DEBUG
 
@@ -782,10 +821,14 @@ void DrawDebug(void)
 	}
 
 	// 文字列の代入
+	CAMERA* pCamera = GetCamera();		//カメラの情報を取得
 
 	sprintf(&aStr[0], "[ 操作説明 ]\n");
 	nLength = (int)strlen(&aStr[0]);
 	sprintf(&aStr[nLength], "<< カメラ操作 >>\n");
+	nLength = (int)strlen(&aStr[0]);
+
+	sprintf(&aStr[nLength], "0          : カメラの随従(%d)\n", pCamera->bfollow);
 	nLength = (int)strlen(&aStr[0]);
 	sprintf(&aStr[nLength], "A, S, D, W          : 視点の移動\n");
 	nLength = (int)strlen(&aStr[0]);
@@ -800,7 +843,7 @@ void DrawDebug(void)
 	sprintf(&aStr[nLength], "U, J                  : 視点～注視点間の距離変更\n");
 	nLength = (int)strlen(&aStr[0]);
 
-	CAMERA* pCamera= GetCamera();		//カメラの情報を取得
+	
 
 
 	sprintf(&aStr[nLength], "視点の座標             : (%.3f, %.3f, %.3f)\n", pCamera->posV.x, pCamera->posV.y, pCamera->posV.z);
@@ -844,6 +887,13 @@ void DrawDebug(void)
 	sprintf(&aStr[nLength], "9           : スポットライト光源 (%d)\n", Enable[2]);
 	nLength = (int)strlen(&aStr[0]);
 
+	sprintf(&aStr[nLength], "\n<< 設定 >>\n");
+	nLength = (int)strlen(&aStr[0]);
+	sprintf(&aStr[nLength], "FSAA           :  (%d)\n", antiAlisa);
+	nLength = (int)strlen(&aStr[0]);
+	sprintf(&aStr[nLength], "wireframe      :  (%d)\n", wireframe);
+	nLength = (int)strlen(&aStr[0]);
+
 
 	// テキストの描画
 	g_pFont->DrawText(NULL, 
@@ -851,14 +901,14 @@ void DrawDebug(void)
 		-1, 
 		&rect, 
 		DT_LEFT,
-		D3DCOLOR_RGBA(0,255, 255, 255));
+		D3DCOLOR_RGBA(0,0, 0, 255));
 
 	g_pFont->DrawText(NULL,
 		&FPSString[0],
 		-1,
 		&rect,
 		DT_RIGHT,
-		D3DCOLOR_RGBA(0, 255, 255, 255));
+		D3DCOLOR_RGBA(0, 0, 0, 255));
 }
 
 // 経過した時間を取得

@@ -29,7 +29,7 @@
     <ClCompile Include="set.cpp" />
     <ClCompile Include="shadow.cpp" />
     <ClCompile Include="skybox.cpp" />
-    <ClCompile Include="terriain.cpp" />
+    <ClCompile Include="terrain.cpp" />
     <ClCompile Include="text.cpp" />
     <ClCompile Include="wall.cpp" />
   </ItemGroup>

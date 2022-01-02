@@ -26,6 +26,12 @@ void SetAll(int cnt, VERTEX_3D *pVtx,
 	pVtx[cnt].tex.y = v;
 }
 
+void SetCol(int cnt, VERTEX_3D *pVtx)
+{
+	// ’¸“_ƒJƒ‰[‚Ì‰Šú‰»ˆ—
+	pVtx[cnt].col = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
 void SetAllPT(int cnt, VERTEX_PT *pVtx,
 	float x, float y, float z,
 	float u, float v)

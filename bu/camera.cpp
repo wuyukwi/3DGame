@@ -11,12 +11,12 @@ void InputCamera();
 void InitCamera(void)
 {
 	// 視点・注視点・上方向を設定する
-	s_camera.posV = D3DXVECTOR3(0.0f, 200.0f, -300.0f);
-	s_camera.posR = D3DXVECTOR3(0.0f, 50.0f, 0.0f);
+	s_camera.posV = D3DXVECTOR3(0.0f, 60.0f, 80.0f);
+	s_camera.posR = D3DXVECTOR3(0.0f, 50.0f, -90.0f);
 	s_camera.vecU = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
 	s_camera.moveV = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	s_camera.moveR = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	s_camera.rot = D3DXVECTOR3(0.0f, -D3DX_PI, 0.0f);
+	s_camera.rot = D3DXVECTOR3(0.0f, D3DX_PI, 0.0f);
 	s_camera.fDistance = 0.0f;
 	s_camera.fAngle = 0.0f;
 
@@ -71,7 +71,7 @@ void SetCamera(void)
 		D3DXToRadian(45.0f),
 		(float)SCREEN_WIDTH / (float)SCREEN_HEIGHT,
 		1.0f,
-		1000.0f);
+		10000.0f);
 
 	// プロジェクションマトリックスの設定
 	pDevice->SetTransform(D3DTS_PROJECTION, &s_camera.mtxProjection);
@@ -79,7 +79,7 @@ void SetCamera(void)
 
 void InputCamera()
 {
-	float CameraSpeed = 0.1f;
+	float CameraSpeed = 0.01f;
 	float MoveSpeed = 1.0f;
 
 

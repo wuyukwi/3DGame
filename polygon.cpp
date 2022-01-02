@@ -7,22 +7,34 @@ Author: Huang QiYue
 #include "set.h"
 #include "model.h"
 
+typedef struct
+{
+	D3DXVECTOR3 pos;	// 頂点座標
+	D3DXVECTOR3 rot;	// 回転座標
+	int nSurfaceWidth;	// 面の幅数
+	int nSurfaceHeight;	// 面の高さ数
+	float fLineWidth;	// 辺の幅
+	float fLineHeight;	// 辺の高さ
+	int vertexCnt;		// 頂点数
+	int polygonCnt;		// ポリゴン数
+	int IdxCnt;			// インデックス数
+	D3DXMATRIX mtxWorld;// ワールドマトリックス
+}Cylinder;
+
 //
 // グローバル
 //
-IDirect3DVertexBuffer9* VB = NULL;// 頂点バッファーへのポインタ
+static LPDIRECT3DVERTEXBUFFER9 s_pVB = NULL;
+static LPDIRECT3DINDEXBUFFER9 s_pIB = NULL;
+static LPDIRECT3DTEXTURE9 WallTex = NULL; // テクスチャへのポインタ
 
-IDirect3DTexture9* FloorTex  = NULL;//
-IDirect3DTexture9* WallTex   = NULL;// テクスチャへのポインタ
-IDirect3DTexture9* MirrorTex = NULL;//
-
-D3DMATERIAL9 FloorMtrl  = WHITE_MTRL;
-D3DMATERIAL9 WallMtrl   = WHITE_MTRL;
-D3DMATERIAL9 MirrorMtrl = WHITE_MTRL;
+D3DMATERIAL9 MirrorMtrl = RED_MTRL;
 
 void RenderScene();
 void RenderMirror();
 
+static const int NumVertex = 10;
+static const int PrimitiveCount = 9;
 //
 // 初期化処理
 //
@@ -30,66 +42,61 @@ void InitPolygon(void)
 {
 	LPDIRECT3DDEVICE9 Device = GetDevice();
 
-	// 壁に低い鏡面反射率を持たせる - 20 % 。
-	WallMtrl.Specular = WHITE * 0.2f;
-
+	
 	Device->CreateVertexBuffer(
-		24 * sizeof(VERTEX_3D),
+		NumVertex * sizeof(VERTEX_3D),
 		0, // usage
 		FVF_VERTEX_3D,
 		D3DPOOL_MANAGED,
-		&VB,
+		&s_pVB,
 		0);
 
 	VERTEX_3D* v = NULL;
-	VB->Lock(0, 0, (void**)&v, 0);
 
-	// floor
-	SetAll(0, v, -150.0f, 0.0f, -200.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f);
-	SetAll(1, v, -150.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
-	SetAll(2, v, 150.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
+	s_pVB->Lock(0, 0, (void**)&v, 0);
 
-	SetAll(3, v, -150.0f, 0.0f, -200.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f);
-	SetAll(4, v, 150.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f);
-	SetAll(5, v, 150.0f, 0.0f, -200.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f);
+	float size = 60.0f;
 
-	// wall
-	SetAll(6, v, -150.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f);
-	SetAll(7, v, -150.0f, 100.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f);
-	SetAll(8, v, -50.0f, 100.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f);
+	v[0].pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	v[0].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+	SetCol(0, v);
+	v[0].tex= D3DXVECTOR2(0.0f, 0.0f);
+	for (int i = 0; i < PrimitiveCount; i++)
+	{
+		float theta = (2*D3DX_PI*i) / PrimitiveCount;
 
-	SetAll(9, v, -150.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f);
-	SetAll(10, v, -50.0f, 100.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f);
-	SetAll(11, v, -50.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
+		v[i+1].pos.x= size * sinf(theta);
+		v[i+1].pos.y = 0.0f;
+		v[i+1].pos.z = size * cosf(theta);
+		v[i+1].nor = D3DXVECTOR3(0.0f, 1.0f, 0.0f);
+		SetCol(i+1, v);
+		v[i+1].tex = D3DXVECTOR2(0.0f, 0.0f);
+	}
 
-	// Note: We leave gap in middle of walls for mirror
+	s_pVB->Unlock();
 
-	SetAll(12, v, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f);
-	SetAll(13, v, 50.0f, 100.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f);
-	SetAll(14, v, 150.0f, 100.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f);
+	// インデックス
+	WORD Indices[] = { 0,1,2, 0,2,3, 0,3,4, 0,4,5, 0,5,6, 0,6,7, 0,7,8, 0,8,9, 0,9,1 };
 
-	SetAll(15, v, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f);
-	SetAll(16, v, 150.0f, 100.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f);
-	SetAll(17, v, 150.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
+	// インデックスバッファの生成
+	Device->CreateIndexBuffer(
+		sizeof(Indices) * sizeof(WORD),
+		0,
+		D3DFMT_INDEX16,
+		D3DPOOL_DEFAULT,
+		&s_pIB,
+		NULL);
 
-	// mirror
-	SetAll(18, v, -50.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f);
-	SetAll(19, v, -50.0f, 100.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f);
-	SetAll(20, v, 50.0f, 100.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f);
-
-	SetAll(21, v, -50.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f);
-	SetAll(22, v, 50.0f, 100.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f);
-	SetAll(23, v, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f);
-
-	VB->Unlock();
+	VOID* pIndices;
+	// インデックスバッファの書き込み
+	s_pIB->Lock(0, sizeof(Indices), (void**)&pIndices, 0);
+	memcpy(pIndices, Indices, sizeof(Indices));
+	s_pIB->Unlock();
 
 	//
 	// Load Textures, set filters.
 	//
-
-	D3DXCreateTextureFromFile(Device, "data\\TEXTURE\\checker.jpg", &FloorTex);
-	D3DXCreateTextureFromFile(Device, "data\\TEXTURE\\brick0.jpg", &WallTex);
-	D3DXCreateTextureFromFile(Device, "data\\TEXTURE\\ice.bmp", &MirrorTex);
+	D3DXCreateTextureFromFile(Device, "data\\TEXTURE\\ice.bmp", &WallTex);
 
 	Device->SetRenderState(D3DRS_NORMALIZENORMALS, true);
 	Device->SetRenderState(D3DRS_SPECULARENABLE, true);
@@ -101,28 +108,13 @@ void InitPolygon(void)
 void UninitPolygon(void)
 {
 	// 頂点バッファーの解放
-	if (VB != NULL)
-	{
-		VB->Release();
-		VB = NULL;
-	}
+	Release<LPDIRECT3DVERTEXBUFFER9>(s_pVB);
+
+	// インデックスバッファーの解放
+	Release<LPDIRECT3DINDEXBUFFER9>(s_pIB);
 
 	// テクスチャの解放
-	if (FloorTex != NULL)
-	{
-		FloorTex->Release();
-		FloorTex = NULL;
-	}
-	if (WallTex != NULL)
-	{
-		WallTex->Release();
-		WallTex = NULL;
-	}
-	if (MirrorTex != NULL)
-	{
-		MirrorTex->Release();
-		MirrorTex = NULL;
-	}
+	Release<LPDIRECT3DTEXTURE9>(WallTex);
 }
 
 
@@ -164,23 +156,14 @@ void RenderScene()
 	D3DXMatrixIdentity(&I);
 	Device->SetTransform(D3DTS_WORLD, &I);
 
-	Device->SetStreamSource(0, VB, 0, sizeof(VERTEX_3D));
+	Device->SetStreamSource(0, s_pVB, 0, sizeof(VERTEX_3D));
 	Device->SetFVF(FVF_VERTEX_3D);
 
-	// draw the floor
-	Device->SetMaterial(&FloorMtrl);
-	Device->SetTexture(0, FloorTex);
-	Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 2);
-
-	// draw the walls
-	Device->SetMaterial(&WallMtrl);
-	Device->SetTexture(0, WallTex);
-	Device->DrawPrimitive(D3DPT_TRIANGLELIST, 6, 4);
-
-	// draw the mirror
+	// 床の描画
 	Device->SetMaterial(&MirrorMtrl);
-	Device->SetTexture(0, MirrorTex);
-	Device->DrawPrimitive(D3DPT_TRIANGLELIST, 18, 2);
+	Device->SetTexture(0, 0);
+	Device->SetIndices(s_pIB);	//インデックスバッファの設定
+	Device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, NumVertex, 0, PrimitiveCount);
 }
 
 void RenderMirror()

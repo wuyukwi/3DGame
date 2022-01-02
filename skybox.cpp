@@ -5,7 +5,7 @@
 //
 // マクロ定義
 //
-#define MAX_SKYBOX_SIZE		(3300)		//幅
+#define MAX_SKYBOX_SIZE		(5000)		//幅
 
 //
 // スタティック変数

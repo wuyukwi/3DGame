@@ -8,12 +8,27 @@ Author: Huang QiYue
 
 #include "main.h"
 
-//------------------------------------
-// プロトタイプ宣言
-//------------------------------------
-void InitWall(void);		// ポリゴンの初期化処理
-void UninitWall(void);	// ポリゴンの終了処理
-void UpdateWall(void);	// ポリゴンの更新処理
-void DrawWall(void);		// ポリゴンの描画処理
+// マクロ定義
+
+
+//壁の構造体
+typedef struct
+{
+	D3DXVECTOR3		pos;			// 位置
+	D3DXVECTOR3		rot;			// 向き
+	D3DXMATRIX		mtxWorld;		// ワールドマトリックス
+	D3DXCOLOR		col;			// カラー
+	float fWidth;				//壁の幅
+	float fHeight;				//壁の高さ
+	bool			bUse;			// 使用状況
+}Wall;
+
+
+//プロトタイプ宣言
+void InitWall(void);
+void UninitWall(void);
+void UpdateWall(void);
+void DrawWall(void);
+void SetWall(D3DXVECTOR3 pos, D3DXVECTOR3 rot, D3DXCOLOR col);
 
 #endif // !_Wall_H_

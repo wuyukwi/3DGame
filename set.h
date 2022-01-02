@@ -46,6 +46,8 @@ void SetAll( int cnt, VERTEX_3D *pVtx,
 	float nx, float ny, float nz,
 	float u, float v);
 
+void SetCol(int cnt, VERTEX_3D *pVtx);
+
 void SetAllPT(int cnt, VERTEX_PT *pVtx,
 	float x, float y, float z,
 	float u, float v);

@@ -12,19 +12,16 @@ Author: Huang QiYue
 #include "polygon.h"
 #include "set.h"
 
-#define FILE_NAME	"data/model/timo.x"
+const char* FILE_NAME = "data/model/airplane.x";
 
 static void MoveModel();
 static void normalized(float *rot);
 
 // グローバル変数
 MODEL				gModel;					// モデル構造体の宣言
-DWORD				MatOut=NULL;
+
 std::ofstream		OutFile;				// used to dump mesh data to file
 
-ID3DXMesh* SphereMesh = 0;
-ID3DXMesh* BoxMesh = 0;
-bool RenderBoundingSphere = true;
 //
 // Prototypes
 //
@@ -57,11 +54,12 @@ void InitModel(void)
 
 
 	// 初期化処理
-	gModel.pos = D3DXVECTOR3(0.0f, 50.0f, -50.0f);
+	gModel.pos = D3DXVECTOR3(0.0f, 10.0f, 0.0f);
 	gModel.rot = D3DXVECTOR3(0.0f, 1.5f, 0.0f);
 	gModel.rotDest = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	
-
+	gModel.bModelInteraction = true;
+	gModel.BoxMesh = NULL;
+	gModel.SphereMesh = NULL;
 
 	//
 	// マテリアルとテクスチャの読み込み
@@ -115,26 +113,24 @@ void InitModel(void)
 		0,// new adjacency info
 		0, 0);
 
-	BoundingBox boundingBox;
-	BoundingSphere boundingSphere;
 
-	ComputeBoundingSphere(gModel.Mesh, &boundingSphere);
-	ComputeBoundingBox(gModel.Mesh, &boundingBox);
+	ComputeBoundingSphere(gModel.Mesh, &gModel.boundingSphere);
+	ComputeBoundingBox(gModel.Mesh, &gModel.boundingBox);
 
 	D3DXCreateSphere(
 		pDevice,
-		boundingSphere._radius,
+		gModel.boundingSphere._radius,
 		20,
 		20,
-		&SphereMesh,
+		&gModel.SphereMesh,
 		0);
 
 	D3DXCreateBox(
 		pDevice,
-		boundingBox._max.x - boundingBox._min.x,
-		boundingBox._max.y - boundingBox._min.y,
-		boundingBox._max.z - boundingBox._min.z,
-		&BoxMesh,
+		gModel.boundingBox._max.x - gModel.boundingBox._min.x,
+		gModel.boundingBox._max.y - gModel.boundingBox._min.y,
+		gModel.boundingBox._max.z - gModel.boundingBox._min.z,
+		&gModel.BoxMesh,
 		0);
 
 	//if (FAILED(hr))
@@ -170,11 +166,11 @@ void InitModel(void)
 
 	OutFile.open("Debug/Mesh Dump.txt");
 
-	dumpVertices(OutFile, gModel.Mesh);
-	dumpIndices(OutFile, gModel.Mesh);
-	dumpAttributeTable(OutFile, gModel.Mesh);
-	dumpAttributeBuffer(OutFile, gModel.Mesh);
-	dumpAdjacencyBuffer(OutFile, gModel.Mesh);
+	//dumpVertices(OutFile, gModel.Mesh);
+	//dumpIndices(OutFile, gModel.Mesh);
+	//dumpAttributeTable(OutFile, gModel.Mesh);
+	//dumpAttributeBuffer(OutFile, gModel.Mesh);
+	//dumpAdjacencyBuffer(OutFile, gModel.Mesh);
 
 #endif //   _DEBUG
 
@@ -213,8 +209,8 @@ void UninitModel(void)
 		gModel.mtrlBuffer = NULL;
 	}
 
-	Release<ID3DXMesh*>(SphereMesh);
-	Release<ID3DXMesh*>(BoxMesh);
+	SAFE_RELEASE(gModel.SphereMesh);
+	SAFE_RELEASE(gModel.BoxMesh);
 }
 
 // モデルの更新処理
@@ -237,7 +233,7 @@ void UpdateModel(void)
 
 	if (GetKeyboardTrigger(DIK_SPACE))
 	{
-		RenderBoundingSphere = !RenderBoundingSphere;
+		gModel.RenderBoundingSphere = !gModel.RenderBoundingSphere;
 	}
 }
 
@@ -273,15 +269,6 @@ void DrawModel(void)
 		// モデルパーツの描写
 		gModel.Mesh->DrawSubset(i);
 
-#ifdef  _DEBUG
-
-		//pDevice->SetMaterial(&YELLOW_MTRL);
-		//pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-		//gModel.Mesh->DrawSubset(i);
-		//pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-
-#endif //   _DEBUG
-
 	}
 
 	D3DMATERIAL9 blue = BLUE_MTRL;
@@ -294,13 +281,13 @@ void DrawModel(void)
 	pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
-	if (RenderBoundingSphere)
+	if (gModel.RenderBoundingSphere)
 	{
-		SphereMesh->DrawSubset(0);
+		gModel.SphereMesh->DrawSubset(0);
 	}
 	else
 	{
-		BoxMesh->DrawSubset(0);
+		gModel.BoxMesh->DrawSubset(0);
 	}
 
 	pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
@@ -318,19 +305,19 @@ static void MoveModel()
 	float fMoveSpeed = 2.0f;	//スピード
 
 	// モデルの移動
-	if (GetKeyboardPress(DIK_LEFT))
-	{// ←キーが押された
+	if (GetKeyboardPress(DIK_RIGHT))
+	{//  →キーが押された
 		if (GetKeyboardPress(DIK_UP))
 		{// ↑キーが押された
-			fRot = pCamera->rot.y + (D3DX_PI * 0.75f);
-
-			gModel.rotDest.y = pCamera->rot.y + (-D3DX_PI * 0.25f);
-		}
-		else if (GetKeyboardPress(DIK_DOWN))
-		{// ↓キーが押された
 			fRot = pCamera->rot.y + (D3DX_PI * 0.25f);
 
 			gModel.rotDest.y = pCamera->rot.y + (-D3DX_PI * 0.75f);
+		}
+		else if (GetKeyboardPress(DIK_DOWN))
+		{// ↓キーが押された
+			fRot = pCamera->rot.y + (D3DX_PI * 0.75f);
+
+			gModel.rotDest.y = pCamera->rot.y + (-D3DX_PI * 0.25f);
 		}
 		else
 		{
@@ -340,19 +327,19 @@ static void MoveModel()
 		}
 
 	}
-	else if (GetKeyboardPress(DIK_RIGHT))
-	{// →キーが押された
+	else if (GetKeyboardPress(DIK_LEFT))
+	{// ←キーが押された
 		if (GetKeyboardPress(DIK_UP))
 		{// ↑キーが押された
-			fRot = pCamera->rot.y + (-D3DX_PI * 0.75f);
-
-			gModel.rotDest.y = pCamera->rot.y + (D3DX_PI * 0.25f);
-		}
-		else if (GetKeyboardPress(DIK_DOWN))
-		{// ↓キーが押された
 			fRot = pCamera->rot.y + (-D3DX_PI * 0.25f);
 
 			gModel.rotDest.y = pCamera->rot.y + (D3DX_PI * 0.75f);
+		}
+		else if (GetKeyboardPress(DIK_DOWN))
+		{// ↓キーが押された
+			fRot = pCamera->rot.y + (-D3DX_PI * 0.75f);
+
+			gModel.rotDest.y = pCamera->rot.y + (D3DX_PI * 0.25f);
 		}
 		else
 		{
@@ -363,13 +350,13 @@ static void MoveModel()
 
 
 	}
-	else if (GetKeyboardPress(DIK_UP))
+	else if (GetKeyboardPress(DIK_DOWN))
 	{// ↑キーが押された
 		fRot = pCamera->rot.y + D3DX_PI;
 
 		gModel.rotDest.y = pCamera->rot.y;
 	}
-	else if (GetKeyboardPress(DIK_DOWN))
+	else if (GetKeyboardPress(DIK_UP))
 	{// ↓キーが押された
 		fRot = pCamera->rot.y;
 
@@ -416,6 +403,55 @@ static void normalized(float *rot)
 	}
 }
 
+//当たり判定
+void ModelInteraction(D3DXVECTOR3*pPos, D3DXVECTOR3*pLastPos, D3DXVECTOR3*pMove, float width, float height, float lenght)
+{
+	bool bInteraction = false;
+
+	//計算用のローカル変数
+	float ModelRight, ModelLeft, ModelTop, ModelBottom, ModelFront, ModelBack;
+	
+	ModelLeft = gModel.boundingBox._min.x - (width * 0.5f);			//モデルの左側
+	ModelRight = gModel.boundingBox._min.x + (width * 0.5f);			//モデルの右側
+	ModelBottom = gModel.boundingBox._min.y- height;				//モデルの下側
+	ModelTop = gModel.boundingBox._min.y;							//モデルの上側
+	ModelBack = gModel.boundingBox._min.z - (lenght * 0.5f);			//モデルの裏側
+	ModelFront = gModel.boundingBox._min.z + (lenght * 0.5f);		//モデルの表側
+
+	if (pPos->x > ModelLeft && pPos->z > ModelBack && pPos->z < ModelFront && pLastPos->x <= ModelLeft && pPos->y > ModelBottom && pPos->y < ModelTop)
+	{//左の当たり判定
+		pPos->x = ModelLeft;
+		pMove->x = 0.0f;
+	}
+	else if (pPos->x < ModelRight && pPos->z > ModelBack && pPos->z < ModelFront && pLastPos->x >= ModelRight && pPos->y > ModelBottom && pPos->y < ModelTop)
+	{//右の当たり判定
+		pPos->x = ModelRight;
+		pMove->x = 0.0f;
+	}
+
+	if (pPos->z > ModelBack && pPos->x > ModelLeft && pPos->x < ModelRight && pLastPos->z <= ModelBack && pPos->y > ModelBottom && pPos->y < ModelTop)
+	{//後ろの当たり判定
+		pPos->z = ModelBack;
+		pMove->z = 0.0f;
+	}
+	else if (pPos->z < ModelFront && pPos->x > ModelLeft && pPos->x < ModelRight && pLastPos->z >= ModelFront && pPos->y > ModelBottom && pPos->y < ModelTop)
+	{//前の当たり判定
+		pPos->z = ModelFront;
+		pMove->z = 0.0f;
+	}
+
+	if (pPos->y > ModelBottom && pLastPos->y <= ModelBottom && pPos->z > ModelBack && pPos->z < ModelFront && pPos->x > ModelLeft && pPos->x < ModelRight)
+	{//下の当たり判定
+		pPos->y = ModelBottom;
+		pMove->y = 0.0f;
+	}
+	else if (pPos->y < ModelTop && pLastPos->y >= ModelTop && pPos->z > ModelBack && pPos->z < ModelFront && pPos->x > ModelLeft && pPos->x < ModelRight)
+	{//上の当たり判定
+		pPos->y = ModelTop;
+		pMove->y = 0.0f;
+		bInteraction = true;
+	}
+}
 //
 // Prototype Implementations
 //
